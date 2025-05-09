@@ -28,7 +28,7 @@ app.config['SECRET_KEY'] = 'ecdeew'
 
 @app.route('/')
 def index():
-    return 'Welcome to Flask!'
+    return '<a href="/users">Пользователи</a>'
 
 
 @app.route('/users')
