@@ -61,10 +61,10 @@ def users_post():
             errors=errors,
         ), 422
     if session.get('users') is None:
-        session['users'] = []
-    else:
-        if not session['users']:
-            users = session['users']
+        session['users'] = [{'id':1, 'name':'egor gr', 'email': 'sosAL@da.com'}, {'id':2, 'name':'egor sin', 'email': 'ikari_sinkin@net.re'}]
+    # else:
+    #     if not session['users']:
+    #         users = session['users']
     users = session['users']
     if not users:
         user = {
@@ -74,10 +74,10 @@ def users_post():
         }
     else:
         user = {
-        'id': session['users'][-1]['id'] + 1,
-        'name': str(user_data['name']),
-        'email': user_data['email']
-    }
+            'id': session['users'][-1]['id'] + 1,
+            'name': str(user_data['name']),
+            'email': user_data['email']
+        }
     session['users'].append(user)
     # add_user(user_data['name'], user_data['email']) база данных
     flash('Пользователь успешно добавлен', 'success')
