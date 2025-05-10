@@ -28,7 +28,7 @@ app.config['SECRET_KEY'] = 'ecdeew'
 
 @app.route('/')
 def index():
-    return '<a href="/users">Пользователи</a>'
+    return '<div style="width: 100vh; margin: 0 auto"><a style="font-size: 10vh;" href="/users">Пользователи</a></div>'
 
 
 @app.route('/users')
@@ -37,6 +37,8 @@ def users_get():
     # with open("app/users.json", "r") as f:
     #     users = json.load(f)
     users = session.get('users', [])
+    if users == []:
+        users = [{'id':1, 'name':'egor gr', 'email': 'sosAL@da.com'}, {'id':2, 'name':'egor sin', 'email': 'ikari_sinkin@net.re'}]
     # users = get_all_users() база данных
     leng = len(users)
     term = request.args.get('term', '')
@@ -67,8 +69,9 @@ def users_post():
     #         users = session['users']
     users = session['users']
     if not users:
+        session['users'] = [{'id':1, 'name':'egor gr', 'email': 'sosAL@da.com'}, {'id': 2, 'name': 'egor sin', 'email': 'ikari_sinkin@net.re'}]
         user = {
-            'id': 1,
+            'id': 3,
             'name': str(user_data['name']),
             'email': user_data['email']
         }
