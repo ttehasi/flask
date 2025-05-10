@@ -38,13 +38,15 @@ def users_get():
     #     users = json.load(f)
     # users = session.get('users', [])
     users = get_all_users()
+    leng = len(users)
     term = request.args.get('term', '')
     filtered_users = [user for user in users if term in user.name]
     return render_template(
         'index.html',
         users=filtered_users,
         search=term,
-        messages=messages
+        messages=messages,
+        leng=leng
     )
 
 
