@@ -9,15 +9,15 @@ from flask import (
     url_for,
     session
 )
-from app.db.utils import (
-    add_user, 
-    get_user_by_id, 
-    get_all_users, 
-    update_user, 
-    detele_user
-)
+# from app.db.utils import (
+#     add_user, 
+#     get_user_by_id, 
+#     get_all_users, 
+#     update_user, 
+#     detele_user
+# )
 
-# сначала двнные хранились в файлах, потом способом хранения стали сессии
+# сначала данные хранились в файлах, потом способом хранения стали сессии
 
 app = Flask(__name__)
 app.secret_key = "secret_key"
@@ -36,11 +36,11 @@ def users_get():
     messages = get_flashed_messages(with_categories=True)
     # with open("app/users.json", "r") as f:
     #     users = json.load(f)
-    # users = session.get('users', [])
-    users = get_all_users()
+    users = session.get('users', [])
+    # users = get_all_users() база данных
     leng = len(users)
     term = request.args.get('term', '')
-    filtered_users = [user for user in users if term in user.name]
+    filtered_users = [user for user in users if term in user['name']]
     return render_template(
         'index.html',
         users=filtered_users,
@@ -60,24 +60,26 @@ def users_post():
             user=user_data,
             errors=errors,
         ), 422
-    # if session.get('users') is None:
-    #     session['users'] = []
-    # else:
-    # if not session['users']:
-    # if not users:
-    #     user = {
-    #         'id': 1,
-    #         'name': str(user_data['name']),
-    #         'email': user_data['email']
-    #     }
-    # else:
-    #     user = {
-    #     'id': session['users'][-1]['id'] + 1,
-    #     'name': str(user_data['name']),
-    #     'email': user_data['email']
-    # }
-    # session['users'].append(user)
-    add_user(user_data['name'], user_data['email'])
+    if session.get('users') is None:
+        session['users'] = []
+    else:
+        if not session['users']:
+            users = session['users']
+    users = session['users']
+    if not users:
+        user = {
+            'id': 1,
+            'name': str(user_data['name']),
+            'email': user_data['email']
+        }
+    else:
+        user = {
+        'id': session['users'][-1]['id'] + 1,
+        'name': str(user_data['name']),
+        'email': user_data['email']
+    }
+    session['users'].append(user)
+    # add_user(user_data['name'], user_data['email']) база данных
     flash('Пользователь успешно добавлен', 'success')
     return redirect(url_for('users_get'), code=302)
     # with open('app/users.json') as file:
@@ -102,8 +104,11 @@ def users_post():
 def edit_user(id):
     # with open('app/users.json', 'r') as file:
     #     users = json.load(file)
-    # users = session.get('users', [])
-    user = get_user_by_id(id)
+    users = session.get('users', [])
+    user = ser = next((user for user in users if user['id'] == id), 'User not found')
+    if user == 'User not found':
+        return user, 404
+    # user = get_user_by_id(id) база данных
     if user:
         errors = {}
         return render_template(
@@ -119,9 +124,9 @@ def edit_user(id):
 def patch_user(id):
     # with open('app/users.json', 'r') as file:
     #     users = json.load(file)
-    # users = session.get('users')
-    # user = next(user for user in users if user['id'] == id)
-    user = get_user_by_id(id)
+    users = session.get('users')
+    user = next(user for user in users if user['id'] == id)
+    # user = get_user_by_id(id) база данных
     data = request.form.to_dict()
     
     errors = validate(data)
@@ -131,14 +136,14 @@ def patch_user(id):
             errors=errors,
             user=user
         ), 422
-    # user['email'] = data['email']
-    # user['name'] = data['name']
+    user['email'] = data['email']
+    user['name'] = data['name']
     # for us in users:
     #     if us['id'] == user['id']:
     #         us = user
     # with open('app/users.json', 'w') as file:
     #     json.dump(users, file)
-    update_user(id, data['name'], data['email'])
+    # update_user(id, data['name'], data['email']) база данных 
     flash("Пользователь успешно обновлен", "success")
     return redirect(url_for('users_get'))
 
@@ -158,9 +163,11 @@ def users_new():
 def users_show(id):
     # with open("app/users.json", "r") as f:
     #     users = json.load(f)
-    # users = session.get('users', [])
-    # user = next((user for user in users if id == user['id']), 'User not found')
-    user = get_user_by_id(id)
+    users = session.get('users', [])
+    user = next((user for user in users if id == user['id']), 'User not found')
+    # user = get_user_by_id(id) база данных
+    if user == 'User not found':
+        return user, 404 
     if user:  
         return render_template(
             'show.html',
@@ -174,14 +181,14 @@ def users_show(id):
 def user_delete(id):
     # with open('app/users.json', 'r') as file:
     #     users = json.load(file)
-    # users = session.get('users', []) 
-    # user = next((i for i in users if i['id'] == id), 'User not found')
-    # if user == 'User not found':
-    #     return user
-    # users.pop(users.index(user))
+    users = session.get('users', []) 
+    user = next((i for i in users if i['id'] == id), 'User not found')
+    if user == 'User not found':
+        return user
+    users.pop(users.index(user))
     # with open('app/users.json', 'w') as file:
     #     json.dump(users, file)
-    detele_user(id)
+    # detele_user(id) база данных
     flash('Пользователь удален', 'success')
     return redirect(url_for('users_get'))
 
